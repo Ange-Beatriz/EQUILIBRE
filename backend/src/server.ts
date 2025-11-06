@@ -1,11 +1,11 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
+import dotenv from 'dotenv/config';
 import passport from './config/passport.config';
 import { testConnection } from './config/db.config';
 import authRoutes from './routes/auth.routes';
 
-dotenv.config();
+//dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
