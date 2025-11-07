@@ -30,7 +30,7 @@ passport.use(
   })
 );
 
-// ✅ Google OAuth Strategy (conditionnel)
+// Google OAuth Strategy (conditionnel)
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   passport.use(
     new GoogleStrategy(
@@ -83,9 +83,9 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       }
     )
   );
-  console.log('✅ Google OAuth activé');
+  console.log('Google OAuth activé');
 } else {
-  console.log('⚠️  Google OAuth désactivé (GOOGLE_CLIENT_ID/SECRET manquants)');
+  console.log('Google OAuth désactivé (GOOGLE_CLIENT_ID/SECRET manquants)');
 }
 
 export default passport;

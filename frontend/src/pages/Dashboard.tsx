@@ -52,7 +52,7 @@ export const Dashboard = () => {
         backgroundColor: '#e7f3ff', 
         borderRadius: '8px'
       }}>
-        <h3>✅ Authentification réussie</h3>
+        <h3>Authentification réussie</h3>
         <p>Vous êtes maintenant connecté à l'application.</p>
         <p>Votre token JWT est stocké dans le localStorage.</p>
       </div>

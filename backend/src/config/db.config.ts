@@ -17,10 +17,10 @@ export const pool = mysql.createPool({
 export const testConnection = async () => {
   try {
     const connection = await pool.getConnection();
-    console.log('✅ MySQL connecté avec succès');
+    console.log('MySQL connecté avec succès');
     connection.release();
   } catch (error) {
-    console.error('❌ Erreur de connexion MySQL:', error);
+    console.error('Erreur de connexion MySQL:', error);
     process.exit(1);
   }
 };
