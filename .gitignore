@@ -1,0 +1,16 @@
+﻿# Node / TypeScript
+node_modules/
+dist/
+coverage/
+.vite/
+*.log
+
+# Envs & secrets
+.env
+.env.*
+!.env.example
+
+# Editor/OS
+.vscode/
+.DS_Store
+Thumbs.db
