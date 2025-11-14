@@ -1,61 +1,121 @@
-import { useAuth } from '../contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
+// frontend/src/pages/Dashboard.tsx
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
-export const Dashboard = () => {
-  const { user, logout, isAuthenticated, isLoading } = useAuth();
+// Fonctions d'API notifications
+import { fetchNotifications, simulateDeposit } from "../services/notification.service";
+import type { Notification } from "../services/notification.service";
 
-  if (isLoading) {
-    return <div>Chargement...</div>;
-  }
+export default function Dashboard() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loadingNotif, setLoadingNotif] = useState(false);
+  const [loadingMock, setLoadingMock] = useState(false);
+
+  // Charger les notifications au montage
+  useEffect(() => {
+    loadNotifications();
+  }, []);
+
+  const loadNotifications = async () => {
+    try {
+      setLoadingNotif(true);
+      const data = await fetchNotifications();
+      setNotifications(data);
+    } catch (err) {
+      console.error("Erreur fetch notifications:", err);
+    } finally {
+      setLoadingNotif(false);
+    }
+  };
+
+  const handleMockDeposit = async () => {
+    try {
+      setLoadingMock(true);
+      await simulateDeposit();
+      await loadNotifications();
+    } catch (err) {
+      console.error("Erreur mock dépôt:", err);
+    } finally {
+      setLoadingMock(false);
+    }
+  };
+
+  const handleLogout = () => {
+    logout();          // on vide token + user
+    navigate("/login"); // et on renvoie vers la page de connexion
+  };
 
   return (
-    <div style={{ maxWidth: '800px', margin: '50px auto', padding: '20px' }}>
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        marginBottom: '30px'
-      }}>
-        <h1>Dashboard</h1>
-        <button
-          onClick={logout}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#dc3545',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Se déconnecter
-        </button>
-      </div>
+    <main className="page" style={{ display: "flex", minHeight: "100vh" }}>
+      <section
+        style={{
+          flex: 1,
+          maxWidth: 600,
+          backgroundColor: "#f0f8ff",
+          padding: "2rem",
+        }}
+      >
+        <header className="page-header">
+          <h1>💉 DASHBOARD TEST</h1>
+          <p>Si tu vois ce titre, c’est le NOUVEAU dashboard ✅</p>
 
-      <div style={{ 
-        padding: '20px', 
-        backgroundColor: '#f8f9fa', 
-        borderRadius: '8px',
-        marginBottom: '20px'
-      }}>
-        <h2>Bienvenue, {user?.name} !</h2>
-        <p><strong>Email:</strong> {user?.email}</p>
-        <p><strong>ID:</strong> {user?.id}</p>
-      </div>
+          {user && (
+            <p>
+              Connecté en tant que{" "}
+              <strong>
+                {user.first_name} {user.last_name}
+              </strong>{" "}
+              — rôle : <strong>{user.role}</strong>
+            </p>
+          )}
+        </header>
 
-      <div style={{ 
-        padding: '20px', 
-        backgroundColor: '#e7f3ff', 
-        borderRadius: '8px'
-      }}>
-        <h3>✅ Authentification réussie</h3>
-        <p>Vous êtes maintenant connecté à l'application.</p>
-        <p>Votre token JWT est stocké dans le localStorage.</p>
-      </div>
-    </div>
+        <div className="page-header-actions" style={{ marginTop: "1.5rem" }}>
+          <button
+            type="button"
+            onClick={handleMockDeposit}
+            disabled={loadingMock}
+            style={{ marginRight: "1rem" }}
+          >
+            {loadingMock ? "Simulation en cours..." : "Simuler un dépôt (mock)"}
+          </button>
+
+          <button type="button" onClick={handleLogout}>
+            Se déconnecter
+          </button>
+        </div>
+
+        <section className="notifications" style={{ marginTop: "2rem" }}>
+          <h2>Mes notifications</h2>
+
+          {loadingNotif ? (
+            <p>Chargement...</p>
+          ) : notifications.length === 0 ? (
+            <p>Aucune notification pour le moment.</p>
+          ) : (
+            <ul>
+              {notifications.map((n) => (
+                <li key={n.id} style={{ marginBottom: "1rem" }}>
+                  <strong>{n.title}</strong>
+                  <p>{n.message}</p>
+                  <small>Reçue le : {n.created_at}</small>
+                  <br />
+                  {!n.is_read && (
+                    <span style={{ color: "green" }}>🟢 Non lue</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </section>
+
+      {/* Partie droite vide pour l’instant, pour la maquette */}
+      <section style={{ flex: 1 }} />
+    </main>
   );
-};
+}

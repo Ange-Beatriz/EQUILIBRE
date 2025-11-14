@@ -1,15 +1,21 @@
-import type { Request, Response, NextFunction } from "express";
-import jwt, { Secret } from "jsonwebtoken";
+// src/middleware/auth.ts
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 
-const JWT_SECRET: Secret = (process.env.JWT_SECRET || "secret-dev") as Secret;
+export type JwtUser = { id: string; email: string; role: string };
 
-export function requireAuth(req: Request, res: Response, next: NextFunction) {
-  const token = req.cookies?.token || req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ message: "Non autorisé" });
+export interface AuthenticatedRequest extends Request {
+  user?: JwtUser;
+}
 
+export function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
-    const payload = jwt.verify(token, JWT_SECRET) as any;
-    req.user = payload; // { id, email, role }
+    const auth = req.headers.authorization || "";
+    const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+    if (!token) return res.status(401).json({ message: "Non autorisé" });
+
+    const payload = jwt.verify(token, process.env.JWT_SECRET as string) as JwtUser;
+    req.user = { id: payload.id, email: payload.email, role: payload.role };
     next();
   } catch {
     return res.status(401).json({ message: "Token invalide" });

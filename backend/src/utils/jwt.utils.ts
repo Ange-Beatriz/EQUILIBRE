@@ -1,23 +1,20 @@
-import jwt from 'jsonwebtoken';
+// src/utils/jwt.utils.ts
+import jwt from "jsonwebtoken";
 
-interface TokenPayload {
-  id: number;
+const JWT_SECRET = process.env.JWT_SECRET || "dev_super_secret";
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
+
+export type JwtPayload = {
+  id: string;
   email: string;
-  name: string;
+  role: string;
+};
+
+export function signToken(payload: JwtPayload) {
+  return jwt.sign(payload, JWT_SECRET, { algorithm: "HS256", expiresIn: JWT_EXPIRES_IN });
 }
 
-export const generateToken = (payload: TokenPayload): string => {
-  const secret = process.env.JWT_SECRET || 'your-fallback-secret-key';
-  const expiresIn = process.env.JWT_EXPIRE || '7d';
-
-  return jwt.sign(payload, secret, { expiresIn });
-};
-
-export const verifyToken = (token: string): TokenPayload | null => {
-  try {
-    const secret = process.env.JWT_SECRET || 'your-fallback-secret-key';
-    return jwt.verify(token, secret) as TokenPayload;
-  } catch (error) {
-    return null;
-  }
-};
+export function verifyToken(token: string): JwtPayload {
+  // lève si invalide/expiré => on catch côté middleware
+  return jwt.verify(token, JWT_SECRET, { algorithms: ["HS256"] }) as JwtPayload;
+}
